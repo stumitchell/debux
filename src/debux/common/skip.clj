@@ -214,12 +214,22 @@
                    z/up)
                true)
 
-        ;; upwards finish
+        ;; upwards finish move onto the form to the right if we see a loop
         (and upwards
-             (symbol? (first node))
-             (ut/final-target? (ut/ns-symbol (first node) env)
-                               (:loop-type (macro-types env))
-                               env))
-        (recur (z/next loc) false)
-
+            (symbol? (first node))
+            (ut/final-target? (ut/ns-symbol (first node) env)
+                              (:loop-type (macro-types env))
+                              env)
+            (not= (z/rightmost loc) loc))
+        (recur (z/right loc) false)
+        
+        ;; upwards finish we found a loop but it was the root of the zipper
+        (and upwards
+            (symbol? (first node))
+            (ut/final-target? (ut/ns-symbol (first node) env)
+                              (:loop-type (macro-types env))
+                              env)
+            (= (z/rightmost loc) loc))
+        (z/root loc)
+        
         :else (recur (z/next loc) false) ))))
